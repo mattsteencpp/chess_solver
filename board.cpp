@@ -46,18 +46,22 @@ board::position::position(std::string str_pos)
 		// convert positions using ASCII characters.
 		// accept either uppercase or lowercase A-H for x position
 		if (str_pos[0] > 96)
-			pos_x = str_pos[0] - 97;
+		{
+			pos_x = str_pos[0] - 96;
+		}
 		else if (str_pos[0] > 64)
-			pos_x = str_pos[0] - 65;
+		{
+			pos_x = str_pos[0] - 64;
+		}
 		pos_y = str_pos[1] - 48;
 		if (!is_valid())
 		{
-			// todo: throw exception
+			throw "created a position that is off the board: " + str_pos;
 		}
 	}
 	else
 	{
-		// todo: throw exception
+		throw "tried to create a position with an invalid string: '" + str_pos + "'. Position strings must start with a letter between A and H (or between and h) for the column followed by a number between 1 and 8 for the row";
 	}
 };
 
@@ -93,6 +97,14 @@ bool board::position::operator>(const position& other)
 	return value > other.value;
 }
 
+std::string board::position::pretty_print()
+{
+	std::string pretty;
+	pretty += ('A' + pos_x - 1);
+	pretty += ('1' + pos_y - 1);
+	return pretty;
+}
+
 void board::pretty_print()
 {
 	std::cout << " -------- " << std::endl;
@@ -117,6 +129,8 @@ void board::pretty_print()
 
 piece* board::get_piece_at_position(board::position position)
 {
+	if (!position.is_valid())
+		return 0;
 	return my_positions[position.pos_x - 1][position.pos_y - 1];
 
 }
@@ -243,39 +257,150 @@ void board::setup_new_game()
 	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
 }
 
-// TODO: implement setup_game_in_progress priority 1
-void board::setup_game_in_progress(std::vector<piece*> pieces)
+// each string in the vector should contain a 4 letter string (case insensitive)
+// the first letter must be either w or b for color
+// the second letter must be k, q, b, n, r, or p for piece
+// 		note that n is used for knights because k is already for king
+// the 3rd and fourth letters represent the algebraic notation for the position the piece should inhabit
+// 		in algebraic notation, the first character is a letter from a to h representing the column
+//			the second character is a number from 1 to 8 representing the row.
+//		in this notation, the standard board setup has white in rows 1 and 2 and black in rows 7 and 8
+// if there is already a piece in the indicated position, an error will result
+void board::setup_game_in_progress(std::vector<std::string> pieces)
 {
-	
+	for (int idx = 0; idx < pieces.size(); idx++)
+	{
+		// parse out the piece type and starting possition
+		std::string current_piece = pieces[idx];
+		if (current_piece.length() != 4)
+		{
+			throw "found an invalid instruction: '" + current_piece + "'. The string must specify the color (B or W), the piece (K, Q, B, N, R, or P) and the position (A-H for row followed by 1-8 for column) using uppercase or lowercase letters.";
+		}
+		int color;
+		switch(current_piece[0])
+		{
+			case 'W':
+			case 'w':
+			{
+				color = PIECE_COLOR_WHITE;
+				break;
+			}
+			case 'B':
+			case 'b':
+			{
+				color = PIECE_COLOR_BLACK;
+				break;
+			}
+			default:
+			{
+				throw "found an invalid instruction: '" + current_piece + "'. The string must start with B, W, b, or w to indicate the color of the piece to be placed.";
+				break;
+			}
+		}
+		board::position pos(current_piece.substr(2,2));
+		if (get_piece_at_position(pos) != 0)
+		{
+			throw "found an invalid instruction: '" + current_piece + "'. There is already a piece (" + get_piece_at_position(pos)->pretty_print() + ") at the specified position.";
+		}
+		
+		// create the piece and put it on the board
+		piece* next_piece;
+		switch(current_piece[1])
+		{
+			case 'K':
+			case 'k':
+			{
+				next_piece = (piece *)new king(color, pos, this);
+				break;
+			}
+			case 'Q':
+			case 'q':
+			{
+				next_piece = (piece *)new queen(color, pos, this);
+				break;
+			}
+			case 'B':
+			case 'b':
+			{
+				next_piece = (piece *)new bishop(color, pos, this);
+				break;
+			}
+			case 'N':
+			case 'n':
+			{
+				next_piece = (piece *)new knight(color, pos, this);
+				break;
+			}
+			case 'R':
+			case 'r':
+			{
+				next_piece = (piece *)new rook(color, pos, this);
+				break;
+			}
+			case 'P':
+			case 'p':
+			{
+				next_piece = (piece *)new pawn(color, pos, this);
+				break;
+			}
+			default:
+			{
+				throw "found an invalid instruction: '" + current_piece + "'. The piece type must be specified with K, Q, B, N, R, or P (using uppercase or lowercase letters).";
+				break;
+			}
+		}
+		
+		if (next_piece)
+		{
+			my_positions[pos.pos_x - 1][pos.pos_y - 1] = next_piece;
+			if (color == PIECE_COLOR_WHITE)
+				my_white_pieces.push_back(next_piece);
+			else
+				my_black_pieces.push_back(next_piece);
+		}
+	}
 }
 
-// TODO: implement evaluate
+// TODO: implement evaluate priority 5
 int board::evaluate(int color)
 {
 	return 0;
 }
 
-// TODO: implement evaluate_after_move
+// TODO: implement evaluate_after_move priority 6
 int board::evaluate_after_move(int color, board::position start_pos, board::position end_pos)
 {
 	return evaluate(color);
+}
+
+
+void board::move_piece(std::string str_start_pos, std::string str_end_pos)
+{
+	board::position start_pos(str_start_pos);
+	board::position end_pos(str_end_pos);
+	move_piece(start_pos, end_pos);
+}
+
+void board::move_piece(board::position start_pos, board::position end_pos)
+{
+	piece* piece_to_move = get_piece_at_position(start_pos);
+	move_piece(piece_to_move, end_pos);
 }
 
 void board::move_piece(piece* piece_to_move, board::position end_pos)
 {
 	if (!piece_to_move)
 	{
-		// todo: throw exception
-		return;
+		throw "Invalid action: asked to move a piece that doesn't exist";
 	}
 	if (is_occupied_by_color(end_pos, !piece_to_move->get_color()))
 	{
 		piece* piece_to_remove = get_piece_at_position(end_pos);
 		remove_piece(piece_to_remove);
 	}
-	my_positions[end_pos.pos_x - 1][end_pos.pos_y - 1] = piece_to_move	;
 	my_positions[piece_to_move->get_position().pos_x - 1][piece_to_move->get_position().pos_y - 1] = 0;
 	piece_to_move->set_position(end_pos);
+	my_positions[end_pos.pos_x - 1][end_pos.pos_y - 1] = piece_to_move;
 	if (piece_to_move->can_be_promoted())
 	{
 		promote_pawn((pawn*)piece_to_move);
@@ -286,17 +411,15 @@ void board::remove_piece(piece* piece_to_remove)
 {
 	if (!piece_to_remove)
 	{
-		// todo: throw exception
-		return;
+		throw "Invalid action: asked to remove a piece that doesn't exist";
 	}
-	int color = !piece_to_remove->get_color();
+	int color = piece_to_remove->get_color();
 	if (color == PIECE_COLOR_WHITE)
 	{
 		std::vector<piece*>::iterator it = std::find(my_white_pieces.begin(), my_white_pieces.end(), piece_to_remove);
 		if (it == my_white_pieces.end())
 		{
-			// todo: throw exception
-			return;
+			throw std::string("Invalid action: the piece to be removed (") + piece_to_remove->pretty_print() + ", " + piece_to_remove->get_position().pretty_print() + ") is white but could not be found in the list of white pieces on the board.";
 		}
 		my_white_pieces.erase(it);
 	}
@@ -305,8 +428,7 @@ void board::remove_piece(piece* piece_to_remove)
 		std::vector<piece*>::iterator it = std::find(my_black_pieces.begin(), my_black_pieces.end(), piece_to_remove);
 		if (it == my_black_pieces.end())
 		{
-			// todo: throw exception
-			return;
+			throw std::string("Invalid action: the piece to be removed (") + piece_to_remove->pretty_print() + ", " + piece_to_remove->get_position().pretty_print() + ") is black but could not be found in the list of black pieces on the board.";
 		}
 		my_black_pieces.erase(it);
 	}
@@ -320,13 +442,11 @@ void board::promote_pawn(pawn* pawn_to_promote)
 {
 	if (!pawn_to_promote)
 	{
-		// todo: throw exception
-		return;
+		throw "Invalid action: the pawn to be promoted does not exist.";
 	}
 	if (!pawn_to_promote->can_be_promoted())
 	{
-		// todo: throw exception
-		return;
+		throw "Invalid action: the pawn cannot be promoted because it is not in the correct position.";
 	}
 	board::position old_position = pawn_to_promote->get_position();
 	int color = pawn_to_promote->get_color();
@@ -360,7 +480,7 @@ bool board::is_in_check_after_move(int color, board::position start_pos, board::
 	return false;
 }
 
-// TODO: implement is_in_checkmate
+// TODO: implement is_in_checkmate priority 4
 bool board::is_in_checkmate(int color)
 {
 	// how does this need to be different from is_in_check?

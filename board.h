@@ -42,7 +42,7 @@ public:
 	~board();
 	
 	void setup_new_game();
-	void setup_game_in_progress(std::vector<piece*> pieces);
+	void setup_game_in_progress(std::vector<std::string> pieces);
 	
 	piece* get_piece_at_position(board::position position);
 	
@@ -50,6 +50,8 @@ public:
 	
 	int evaluate_after_move(int color, board::position start_pos, board::position end_pos);
 	
+	void move_piece(std::string str_start_pos, std::string str_end_pos);
+	void move_piece(board::position start_pos, board::position end_pos);
 	void move_piece(piece* piece_to_move, board::position end_pos);
 	
 	bool is_occupied_by_color(board::position pos, int color);
