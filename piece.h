@@ -25,7 +25,10 @@ public:
 	virtual char pretty_print() = 0;
 	
 	board::position get_position() { return my_position; }
+	void set_position(board::position new_position);
 	int get_color() { return my_color; }
+	
+	bool can_be_promoted() { return false; }
 
 protected:
 	virtual std::vector<board::position> get_possible_moves() = 0;

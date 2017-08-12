@@ -1,6 +1,35 @@
 
 #include "pawn.h"
 
+bool pawn::is_valid_move(board::position new_position)
+{
+	if (abs(my_position.pos_x - new_position.pos_x) == 1 && abs(my_position.pos_y - new_position.pos_y) == 1)
+	{
+		return is_valid_diagonal_move(new_position);
+	}
+	return new_position.is_valid() && 
+		!gameboard->is_occupied_by_color(new_position, my_color) && 
+		gameboard->is_occupied_by_color(new_position, !my_color) && 
+		!gameboard->is_in_check_after_move(my_color, my_position, new_position);
+}
+
+bool pawn::is_valid_diagonal_move(board::position new_position)
+{
+	return new_position.is_valid() && 
+		!gameboard->is_occupied_by_color(new_position, my_color) && 
+		gameboard->is_occupied_by_color(new_position, !my_color) && 
+		!gameboard->is_in_check_after_move(my_color, my_position, new_position);
+}
+
+bool pawn::can_be_promoted()
+{
+	if (my_color == PIECE_COLOR_WHITE && my_position.pos_y == 8)
+		return true;
+	if (my_color == PIECE_COLOR_BLACK && my_position.pos_y == 1)
+		return true;
+	return false;
+}
+
 std::vector<board::position> pawn::get_possible_moves()
 {
 	std::vector<board::position> moves;
@@ -51,10 +80,3 @@ std::vector<board::position> pawn::get_possible_moves()
 	return moves;
 }
 
-bool pawn::is_valid_diagonal_move(board::position new_position)
-{
-	return new_position.is_valid() && 
-		!gameboard->is_occupied_by_color(new_position, my_color) && 
-		gameboard->is_occupied_by_color(new_position, !my_color) && 
-		!gameboard->is_in_check_after_move(my_color, my_position, new_position);
-}

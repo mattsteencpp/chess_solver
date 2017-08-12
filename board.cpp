@@ -8,6 +8,7 @@
 #include "queen.h"
 
 #include <iostream>
+#include <algorithm>
 
 board::board()
 {
@@ -51,12 +52,12 @@ board::position::position(std::string str_pos)
 		pos_y = str_pos[1] - 48;
 		if (!is_valid())
 		{
-			// TODO: throw exception
+			// todo: throw exception
 		}
 	}
 	else
 	{
-		// TODO: throw exception
+		// todo: throw exception
 	}
 };
 
@@ -79,6 +80,17 @@ bool board::position::operator!=(const position& other)
 	if (pos_x != other.pos_x || pos_y != other.pos_y)
 		return true;
 	return false;
+}
+
+
+bool board::position::operator<(const position& other)
+{
+	return value < other.value;
+}
+
+bool board::position::operator>(const position& other)
+{
+	return value > other.value;
 }
 
 void board::pretty_print()
@@ -231,7 +243,7 @@ void board::setup_new_game()
 	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
 }
 
-// TODO: implement setup_game_in_progress!
+// TODO: implement setup_game_in_progress priority 1
 void board::setup_game_in_progress(std::vector<piece*> pieces)
 {
 	
@@ -249,25 +261,88 @@ int board::evaluate_after_move(int color, board::position start_pos, board::posi
 	return evaluate(color);
 }
 
-// TODO: implement move_piece
-void board::move_piece(board::position start_pos, board::position end_pos)
+void board::move_piece(piece* piece_to_move, board::position end_pos)
 {
-
+	if (!piece_to_move)
+	{
+		// todo: throw exception
+		return;
+	}
+	if (is_occupied_by_color(end_pos, !piece_to_move->get_color()))
+	{
+		piece* piece_to_remove = get_piece_at_position(end_pos);
+		remove_piece(piece_to_remove);
+	}
+	my_positions[end_pos.pos_x - 1][end_pos.pos_y - 1] = piece_to_move	;
+	my_positions[piece_to_move->get_position().pos_x - 1][piece_to_move->get_position().pos_y - 1] = 0;
+	piece_to_move->set_position(end_pos);
+	if (piece_to_move->can_be_promoted())
+	{
+		promote_pawn((pawn*)piece_to_move);
+	}
 }
 
-// TODO: implement capture_piece
-void board::capture_piece(board::position pos)
+void board::remove_piece(piece* piece_to_remove)
 {
-
+	if (!piece_to_remove)
+	{
+		// todo: throw exception
+		return;
+	}
+	int color = !piece_to_remove->get_color();
+	if (color == PIECE_COLOR_WHITE)
+	{
+		std::vector<piece*>::iterator it = std::find(my_white_pieces.begin(), my_white_pieces.end(), piece_to_remove);
+		if (it == my_white_pieces.end())
+		{
+			// todo: throw exception
+			return;
+		}
+		my_white_pieces.erase(it);
+	}
+	else
+	{
+		std::vector<piece*>::iterator it = std::find(my_black_pieces.begin(), my_black_pieces.end(), piece_to_remove);
+		if (it == my_black_pieces.end())
+		{
+			// todo: throw exception
+			return;
+		}
+		my_black_pieces.erase(it);
+	}
+	my_positions[piece_to_remove->get_position().pos_x - 1][piece_to_remove->get_position().pos_y - 1] = 0;
+	delete piece_to_remove;
 }
 
-// TODO: implement promote_pawn
-void board::promote_pawn(board::position pos)
+// if a pawn reaches the opponent's back row, it can be promoted to any piece. we always promote to queen 
+// because queen has the most power and highest point value
+void board::promote_pawn(pawn* pawn_to_promote)
 {
-	
+	if (!pawn_to_promote)
+	{
+		// todo: throw exception
+		return;
+	}
+	if (!pawn_to_promote->can_be_promoted())
+	{
+		// todo: throw exception
+		return;
+	}
+	board::position old_position = pawn_to_promote->get_position();
+	int color = pawn_to_promote->get_color();
+	remove_piece(pawn_to_promote);
+	queen* new_queen = new queen(color, old_position, this);
+	if (color == PIECE_COLOR_WHITE)
+	{
+		my_white_pieces.push_back(new_queen);
+	}
+	else
+	{
+		my_black_pieces.push_back(new_queen);
+	}
 }
 
-// TODO: implement is_in_check
+// TODO: implement is_in_check priority 2
 bool board::is_in_check(int color)
 {
 	// iterate over pieces of the other color given the current setup
@@ -276,7 +351,7 @@ bool board::is_in_check(int color)
 	return false;
 }
 
-// TODO: implement is_in_check_after_move
+// TODO: implement is_in_check_after_move priority 3
 bool board::is_in_check_after_move(int color, board::position start_pos, board::position end_pos)
 {
 	// iterate over pieces of the other color given the current setup

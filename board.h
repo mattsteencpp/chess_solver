@@ -7,6 +7,7 @@
 #include <string>
 
 class piece;
+class pawn;
 
 class board
 {
@@ -28,6 +29,8 @@ public:
 		{};
 		bool operator==(const position& other);
 		bool operator!=(const position& other);
+		bool operator<(const position& other);
+		bool operator>(const position& other);
 		int pos_x;
 		int pos_y;
 		int value;
@@ -41,14 +44,13 @@ public:
 	void setup_new_game();
 	void setup_game_in_progress(std::vector<piece*> pieces);
 	
-	// TODO: is this method necessary? should pieces ever need to know?
 	piece* get_piece_at_position(board::position position);
 	
 	int evaluate(int color);
 	
 	int evaluate_after_move(int color, board::position start_pos, board::position end_pos);
 	
-	void move_piece(board::position start_pos, board::position end_pos);
+	void move_piece(piece* piece_to_move, board::position end_pos);
 	
 	bool is_occupied_by_color(board::position pos, int color);
 	
@@ -58,8 +60,8 @@ public:
 	
 	void pretty_print();
 private:
-	void capture_piece(board::position pos);
-	void promote_pawn(board::position pos);
+	void remove_piece(piece* piece_to_remove);
+	void promote_pawn(pawn* pawn_to_promote);
 	std::vector<piece*> my_black_pieces;
 	std::vector<piece*> my_white_pieces;
 	
