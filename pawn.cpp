@@ -1,19 +1,19 @@
 
 #include "pawn.h"
 
-bool pawn::is_valid_move(board::position new_position)
+bool pawn::is_valid_position(board::position new_position)
 {
 	if (abs(my_position.pos_x - new_position.pos_x) == 1 && abs(my_position.pos_y - new_position.pos_y) == 1)
 	{
-		return is_valid_diagonal_move(new_position);
+		return is_valid_diagonal_position(new_position);
 	}
 	return new_position.is_valid() && 
 		!gameboard->is_occupied_by_color(new_position, my_color) && 
-		gameboard->is_occupied_by_color(new_position, !my_color) && 
+		!gameboard->is_occupied_by_color(new_position, !my_color) && 
 		!gameboard->is_in_check_after_move(my_color, my_position, new_position);
 }
 
-bool pawn::is_valid_diagonal_move(board::position new_position)
+bool pawn::is_valid_diagonal_position(board::position new_position)
 {
 	return new_position.is_valid() && 
 		!gameboard->is_occupied_by_color(new_position, my_color) && 
@@ -44,7 +44,7 @@ std::vector<board::position> pawn::get_possible_moves()
 	new_position.value = gameboard->evaluate(my_color);
 	moves.push_back(new_position);
 	board::position straight_ahead(my_position.pos_x, my_position.pos_y + y_change);
-	if (is_valid_move(straight_ahead))
+	if (is_valid_position(straight_ahead))
 	{
 		piece* potential_capture = gameboard->get_piece_at_position(straight_ahead);
 		if (!potential_capture)
@@ -55,8 +55,8 @@ std::vector<board::position> pawn::get_possible_moves()
 			// on the first move, a pawn may move 2 squares forward instead of 1, assuming there is no piece one square ahead
 			if ((my_color == PIECE_COLOR_WHITE && my_position.pos_y == 2) || (my_color == PIECE_COLOR_BLACK && my_position.pos_y == 7))
 			{
-				board::position straight_ahead_2(my_position.pos_x, my_position.pos_y + y_change);
-				if (is_valid_move(straight_ahead_2))
+				board::position straight_ahead_2(my_position.pos_x, my_position.pos_y + y_change + y_change);
+				if (is_valid_position(straight_ahead_2))
 				{
 					straight_ahead_2.value = gameboard->evaluate_after_move(my_color, my_position, straight_ahead_2);
 					moves.push_back(straight_ahead_2);
@@ -65,14 +65,14 @@ std::vector<board::position> pawn::get_possible_moves()
 		}
 	}
 	board::position diagonal_left(my_position.pos_x - 1, my_position.pos_y + y_change);
-	if (is_valid_diagonal_move(diagonal_left))
+	if (is_valid_diagonal_position(diagonal_left))
 	{
 		diagonal_left.value = gameboard->evaluate_after_move(my_color, my_position, diagonal_left);
 		moves.push_back(diagonal_left);
 	}
 	
 	board::position diagonal_right(my_position.pos_x + 1, my_position.pos_y + y_change);
-	if (is_valid_move(diagonal_right))
+	if (is_valid_diagonal_position(diagonal_right))
 	{
 		diagonal_right.value = gameboard->evaluate_after_move(my_color, my_position, diagonal_right);
 		moves.push_back(diagonal_right);

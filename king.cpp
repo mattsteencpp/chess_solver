@@ -10,7 +10,7 @@ std::vector<board::position> king::get_possible_moves()
 		for (int j = -1; j < 2; j++)
 		{
 			board::position new_position(my_position.pos_x + i, my_position.pos_y + j);
-			if (is_valid_move(new_position))
+			if (is_valid_position(new_position))
 			{
 				if (new_position != my_position)
 				{

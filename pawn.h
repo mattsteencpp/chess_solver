@@ -22,9 +22,9 @@ public:
 private:
 	std::vector<board::position> get_possible_moves();
 	
-	bool is_valid_move(board::position new_position);
+	bool is_valid_position(board::position new_position);
 	
-	bool is_valid_diagonal_move(board::position new_position);
+	bool is_valid_diagonal_position(board::position new_position);
 };
 
 #endif

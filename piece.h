@@ -34,6 +34,7 @@ protected:
 	virtual std::vector<board::position> get_possible_moves() = 0;
 	
 	bool is_valid_move(board::position new_position);
+	bool is_valid_position(board::position new_position);
 	
 	void add_diagonal_moves(std::vector<board::position>& moves);
 	void add_straight_line_moves(std::vector<board::position>& moves);
