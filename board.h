@@ -15,6 +15,12 @@ public:
 	class position
 	{
 	public:
+		position()
+		:
+			pos_x(1),
+			pos_y(1),
+			value(0)
+		{}
 		position(std::string str_pos);
 		position(const position& source)
 		:
@@ -52,7 +58,7 @@ public:
 	
 	// TODO: add support for castling priority 7
 	
-	// TODO: determine what system will be used to evaluate potential moves (as opposed to the current state of the board)
+	// TODO: determine what system will be used to evaluate potential moves (as opposed to the current state of the board) priority 3
 	// we will need to be able to undo changes that are made!
 	
 	void move_piece(std::string str_start_pos, std::string str_end_pos);
@@ -65,12 +71,17 @@ public:
 	bool is_in_check_after_move(int color, board::position start_pos, board::position end_pos);
 	bool is_in_checkmate(int color);
 	
+	char* get_color_name(int color);
+	
 	void pretty_print();
 private:
 	void remove_piece(piece* piece_to_remove);
 	void promote_pawn(pawn* pawn_to_promote);
 	std::vector<piece*> my_black_pieces;
 	std::vector<piece*> my_white_pieces;
+	
+	board::position white_king_pos;
+	board::position black_king_pos;
 	
 	piece* my_positions[8][8];
 };

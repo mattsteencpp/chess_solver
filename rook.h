@@ -19,7 +19,6 @@ public:
 	~rook();
 
 	char pretty_print() { if (my_color == PIECE_COLOR_WHITE) return 'R'; return 'r'; }
-private:
 	std::vector<board::position> get_possible_moves();
 };
 

@@ -36,13 +36,13 @@ public:
 	board::position get_position() { return my_position; }
 	void set_position(board::position new_position);
 	int get_color() { return my_color; }
+	int get_opposing_color() { return !my_color; }
 	
 	int get_type() { return piece_type; }
 
-protected:
-	// TODO: consider maintaining a (sorted) move list and updating for all pieces after each move
+	// TODO: consider maintaining a (sorted) move list and updating for all pieces after each move priority 2
 	virtual std::vector<board::position> get_possible_moves() = 0;
-	
+protected:
 	bool is_valid_move(board::position new_position);
 	bool is_valid_position(board::position new_position);
 	

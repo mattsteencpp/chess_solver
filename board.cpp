@@ -105,6 +105,14 @@ std::string board::position::pretty_print()
 	return pretty;
 }
 
+char* board::get_color_name(int color)
+{
+	if (color == PIECE_COLOR_WHITE)
+		return "white";
+	else
+		return "black";
+}
+
 void board::pretty_print()
 {
 	std::cout << " -------- " << std::endl;
@@ -185,6 +193,8 @@ void board::setup_new_game()
 	my_white_pieces.push_back(next_piece);
 	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
 	
+	white_king_pos = base_position;
+	
 	base_position.pos_x++;
 	next_piece = (piece *)new bishop(PIECE_COLOR_WHITE, base_position, this);
 	my_white_pieces.push_back(next_piece);
@@ -240,6 +250,8 @@ void board::setup_new_game()
 	next_piece = (piece *)new king(PIECE_COLOR_BLACK, base_position, this);
 	my_black_pieces.push_back(next_piece);
 	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+	black_king_pos = base_position;
 	
 	base_position.pos_x++;
 	next_piece = (piece *)new bishop(PIECE_COLOR_BLACK, base_position, this);
@@ -311,6 +323,10 @@ void board::setup_game_in_progress(std::vector<std::string> pieces)
 			case 'k':
 			{
 				next_piece = (piece *)new king(color, pos, this);
+				if (color == PIECE_COLOR_WHITE)
+					white_king_pos = pos;
+				else
+					black_king_pos = pos;
 				break;
 			}
 			case 'Q':
@@ -389,6 +405,8 @@ void board::move_piece(board::position start_pos, board::position end_pos)
 
 void board::move_piece(piece* piece_to_move, board::position end_pos)
 {
+	if (is_in_check(piece_to_move->get_color()) && is_in_check_after_move(piece_to_move->get_color(), piece_to_move->get_position(), end_pos))
+		throw std::string("Invalid move. The ") + get_color_name(piece_to_move->get_color()) + " player is in check. The specified move will leave the player in check, which is not allowed.";
 	if (!piece_to_move)
 	{
 		throw "Invalid action: asked to move a piece that doesn't exist";
@@ -396,7 +414,7 @@ void board::move_piece(piece* piece_to_move, board::position end_pos)
 	// note: we update the piece before we update the board because pawns require the piece on the other end to be present for diagonal moves
 	board::position current_pos = piece_to_move->get_position();
 	piece_to_move->set_position(end_pos);
-	if (is_occupied_by_color(end_pos, !piece_to_move->get_color()))
+	if (is_occupied_by_color(end_pos, piece_to_move->get_opposing_color()))
 	{
 		piece* piece_to_remove = get_piece_at_position(end_pos);
 		remove_piece(piece_to_remove);
@@ -405,6 +423,20 @@ void board::move_piece(piece* piece_to_move, board::position end_pos)
 	my_positions[end_pos.pos_x - 1][end_pos.pos_y - 1] = piece_to_move;
 	if (piece_to_move->get_type() == PIECE_TYPE_PAWN && ((pawn*) piece_to_move)->can_be_promoted())
 		promote_pawn((pawn*)piece_to_move);
+	else if (piece_to_move->get_type() == PIECE_TYPE_KING)
+	{
+		if (piece_to_move->get_color() == PIECE_COLOR_WHITE)
+			white_king_pos = piece_to_move->get_position();
+		else
+			black_king_pos = piece_to_move->get_position();
+	}
+	if (is_in_check(piece_to_move->get_opposing_color()))
+	{
+		if (is_in_checkmate(piece_to_move->get_opposing_color()))
+			printf("%s has been checkmated!\n", get_color_name(piece_to_move->get_opposing_color()));
+		else
+			printf("%s is in check!\n", get_color_name(piece_to_move->get_opposing_color()));
+	}
 }
 
 void board::remove_piece(piece* piece_to_remove)
@@ -463,16 +495,37 @@ void board::promote_pawn(pawn* pawn_to_promote)
 	my_positions[old_position.pos_x - 1][old_position.pos_y - 1] = new_queen;
 }
 
-// TODO: implement is_in_check priority 2
 bool board::is_in_check(int color)
 {
+	// find the king of this color and store the position
 	// iterate over pieces of the other color given the current setup
-	// if any of them has, as a possible (optimal?) move, capturing the king, then return true
-	
+	// if any of them has, as a possible move, capturing the king, then return true
+	if (color == PIECE_COLOR_WHITE)
+	{
+		for (int idx = 0; idx < my_black_pieces.size(); idx++)
+		{
+			std::vector<board::position> moves = my_black_pieces[idx]->get_possible_moves();
+			if (std::find(moves.begin(), moves.end(), white_king_pos) != moves.end())
+			{
+				return true;
+			}
+		}
+	}
+	else
+	{
+		for (int idx = 0; idx < my_white_pieces.size(); idx++)
+		{
+			std::vector<board::position> moves = my_white_pieces[idx]->get_possible_moves();
+			if (std::find(moves.begin(), moves.end(), black_king_pos) != moves.end())
+			{
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
-// TODO: implement is_in_check_after_move priority 3
+// TODO: implement is_in_check_after_move priority 4
 bool board::is_in_check_after_move(int color, board::position start_pos, board::position end_pos)
 {
 	// iterate over pieces of the other color given the current setup
@@ -481,10 +534,44 @@ bool board::is_in_check_after_move(int color, board::position start_pos, board::
 	return false;
 }
 
-// TODO: implement is_in_checkmate priority 4
 bool board::is_in_checkmate(int color)
 {
-	// how does this need to be different from is_in_check?
+	// find the king of this color and store the position
+	board::position king_pos;
+	// iterate over pieces of the current color and compare their best moves
+	// if, after the very best move, that color is still in check, then that color has been checkmated
+	if (color == PIECE_COLOR_WHITE)
+	{
+		piece* best_piece_to_move = 0;
+		int best_score = -1000;
+		for (int idx = 0; idx < my_white_pieces.size(); idx++)
+		{
+			board::position best_move = my_white_pieces[idx]->get_best_move();
+			if (best_move.value > best_score)
+			{
+				best_score = best_move.value;
+				best_piece_to_move = my_white_pieces[idx];
+			}
+		}
+		if (is_in_check_after_move(color, best_piece_to_move->get_position(), best_piece_to_move->get_best_move()))
+			return true;
+	}
+	else
+	{
+		piece* best_piece_to_move = 0;
+		int best_score = -1000;
+		for (int idx = 0; idx < my_white_pieces.size(); idx++)
+		{
+			board::position best_move = my_white_pieces[idx]->get_best_move();
+			if (best_move.value > best_score)
+			{
+				best_score = best_move.value;
+				best_piece_to_move = my_white_pieces[idx];
+			}
+		}
+		if (is_in_check_after_move(color, best_piece_to_move->get_position(), best_piece_to_move->get_best_move()))
+			return true;
+	}
 	return false;
 }
 

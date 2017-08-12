@@ -21,9 +21,9 @@ public:
 	bool can_be_promoted();
 
 	char pretty_print() { if (my_color == PIECE_COLOR_WHITE) return 'P'; return 'p'; }
-private:
-	std::vector<board::position> get_possible_moves();
 	
+	std::vector<board::position> get_possible_moves();
+private:
 	bool is_valid_position(board::position new_position);
 	
 	bool is_valid_diagonal_position(board::position new_position);
