@@ -13,7 +13,9 @@ public:
 	pawn(int color, board::position pos, board* new_board)
 	:
 		piece(color, pos, new_board)
-	{};
+	{
+		piece_type = PIECE_TYPE_PAWN;
+	};
 	~pawn();
 	
 	bool can_be_promoted();

@@ -127,11 +127,11 @@ void board::pretty_print()
 	std::cout << " -------- " << std::endl;
 }
 
-piece* board::get_piece_at_position(board::position position)
+piece* board::get_piece_at_position(board::position pos)
 {
-	if (!position.is_valid())
+	if (!pos.is_valid())
 		return 0;
-	return my_positions[position.pos_x - 1][position.pos_y - 1];
+	return my_positions[pos.pos_x - 1][pos.pos_y - 1];
 
 }
 bool board::is_occupied_by_color(board::position pos, int color)
@@ -393,18 +393,18 @@ void board::move_piece(piece* piece_to_move, board::position end_pos)
 	{
 		throw "Invalid action: asked to move a piece that doesn't exist";
 	}
+	// note: we update the piece before we update the board because pawns require the piece on the other end to be present for diagonal moves
+	board::position current_pos = piece_to_move->get_position();
+	piece_to_move->set_position(end_pos);
 	if (is_occupied_by_color(end_pos, !piece_to_move->get_color()))
 	{
 		piece* piece_to_remove = get_piece_at_position(end_pos);
 		remove_piece(piece_to_remove);
 	}
-	my_positions[piece_to_move->get_position().pos_x - 1][piece_to_move->get_position().pos_y - 1] = 0;
-	piece_to_move->set_position(end_pos);
+	my_positions[current_pos.pos_x - 1][current_pos.pos_y - 1] = 0;
 	my_positions[end_pos.pos_x - 1][end_pos.pos_y - 1] = piece_to_move;
-	if (piece_to_move->can_be_promoted())
-	{
+	if (piece_to_move->get_type() == PIECE_TYPE_PAWN && ((pawn*) piece_to_move)->can_be_promoted())
 		promote_pawn((pawn*)piece_to_move);
-	}
 }
 
 void board::remove_piece(piece* piece_to_remove)
@@ -460,6 +460,7 @@ void board::promote_pawn(pawn* pawn_to_promote)
 	{
 		my_black_pieces.push_back(new_queen);
 	}
+	my_positions[old_position.pos_x - 1][old_position.pos_y - 1] = new_queen;
 }
 
 // TODO: implement is_in_check priority 2

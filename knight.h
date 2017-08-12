@@ -15,7 +15,9 @@ public:
 		piece(color, pos, new_board),
 		x_moves{1, 1, -1, -1, 2, 2, -2, -2},
 		y_moves{2, -2, 2, -2, 1, -1, 1, -1}
-	{};
+	{
+		piece_type = PIECE_TYPE_KNIGHT;
+	};
 	~knight();
 
 	// King also starts with K, so use N for night, as is tradition

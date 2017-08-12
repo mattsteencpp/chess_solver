@@ -9,6 +9,14 @@
 #define PIECE_COLOR_WHITE 0
 #define PIECE_COLOR_BLACK 1
 
+#define PIECE_TYPE_NONE 0
+#define PIECE_TYPE_KING 1
+#define PIECE_TYPE_QUEEN 2
+#define PIECE_TYPE_BISHOP 3
+#define PIECE_TYPE_ROOK 4
+#define PIECE_TYPE_KNIGHT 5
+#define PIECE_TYPE_PAWN 6
+
 class piece
 {
 public:
@@ -16,7 +24,8 @@ public:
 	:
 		my_color(color),
 		my_position(pos),
-		gameboard(new_board)
+		gameboard(new_board),
+		piece_type(PIECE_TYPE_NONE)
 	{};
 	~piece();
 
@@ -28,9 +37,10 @@ public:
 	void set_position(board::position new_position);
 	int get_color() { return my_color; }
 	
-	bool can_be_promoted() { return false; }
+	int get_type() { return piece_type; }
 
 protected:
+	// TODO: consider maintaining a (sorted) move list and updating for all pieces after each move
 	virtual std::vector<board::position> get_possible_moves() = 0;
 	
 	bool is_valid_move(board::position new_position);
@@ -40,6 +50,7 @@ protected:
 	void add_straight_line_moves(std::vector<board::position>& moves);
 	
 	int my_color;
+	int piece_type;
 	board::position my_position;
 	board* gameboard;
 };

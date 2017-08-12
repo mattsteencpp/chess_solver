@@ -44,11 +44,16 @@ public:
 	void setup_new_game();
 	void setup_game_in_progress(std::vector<std::string> pieces);
 	
-	piece* get_piece_at_position(board::position position);
+	piece* get_piece_at_position(board::position pos);
 	
 	int evaluate(int color);
 	
 	int evaluate_after_move(int color, board::position start_pos, board::position end_pos);
+	
+	// TODO: add support for castling priority 7
+	
+	// TODO: determine what system will be used to evaluate potential moves (as opposed to the current state of the board)
+	// we will need to be able to undo changes that are made!
 	
 	void move_piece(std::string str_start_pos, std::string str_end_pos);
 	void move_piece(board::position start_pos, board::position end_pos);
