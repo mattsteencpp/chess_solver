@@ -39,7 +39,6 @@ std::vector<board::position> pawn::get_possible_moves(bool evaluating_check)
 		y_change = -1;
 	}
 	board::position new_position(my_position);
-	new_position.value = gameboard->evaluate(my_color);
 	moves.push_back(new_position);
 	board::position straight_ahead(my_position.pos_x, my_position.pos_y + y_change);
 	if (is_valid_position(straight_ahead))
@@ -47,7 +46,6 @@ std::vector<board::position> pawn::get_possible_moves(bool evaluating_check)
 		piece* potential_capture = gameboard->get_piece_at_position(straight_ahead);
 		if (!potential_capture)
 		{
-			straight_ahead.value = gameboard->evaluate_after_move(my_color, my_position, straight_ahead);
 			moves.push_back(straight_ahead);
 			
 			// on the first move, a pawn may move 2 squares forward instead of 1, assuming there is no piece one square ahead
@@ -55,26 +53,17 @@ std::vector<board::position> pawn::get_possible_moves(bool evaluating_check)
 			{
 				board::position straight_ahead_2(my_position.pos_x, my_position.pos_y + y_change + y_change);
 				if (is_valid_position(straight_ahead_2))
-				{
-					straight_ahead_2.value = gameboard->evaluate_after_move(my_color, my_position, straight_ahead_2);
 					moves.push_back(straight_ahead_2);
-				}
 			}
 		}
 	}
 	board::position diagonal_left(my_position.pos_x - 1, my_position.pos_y + y_change);
 	if (is_valid_diagonal_position(diagonal_left))
-	{
-		diagonal_left.value = gameboard->evaluate_after_move(my_color, my_position, diagonal_left);
 		moves.push_back(diagonal_left);
-	}
 	
 	board::position diagonal_right(my_position.pos_x + 1, my_position.pos_y + y_change);
 	if (is_valid_diagonal_position(diagonal_right))
-	{
-		diagonal_right.value = gameboard->evaluate_after_move(my_color, my_position, diagonal_right);
 		moves.push_back(diagonal_right);
-	}
 	return moves;
 }
 

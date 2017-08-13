@@ -8,9 +8,9 @@ piece::~piece()
 
 }
 
-void piece::set_position(board::position new_position, bool castling)
+void piece::set_position(board::position new_position, bool should_validate_move)
 {
-	if (castling)
+	if (!should_validate_move)
 	{
 		if (!new_position.is_valid())
 		{
@@ -28,6 +28,14 @@ void piece::set_position(board::position new_position, bool castling)
 board::position piece::get_best_move(bool evaluating_check)
 {
 	std::vector<board::position> moves = get_possible_moves(evaluating_check);
+	for (int idx = 0; idx < moves.size(); idx++)
+	{
+		board::position next_move = moves[idx];
+		if (next_move != my_position)
+			moves[idx].value = gameboard->evaluate_after_move(my_color, my_position, next_move);
+		else
+			moves[idx].value = gameboard->evaluate(my_color);
+	}
 	std::sort(moves.begin(), moves.end());
 	return moves.front();
 }
@@ -44,11 +52,6 @@ bool piece::is_valid_position(board::position new_position)
 bool piece::is_valid_move(board::position new_position)
 {
 	std::vector<board::position> moves = get_possible_moves();
-	std::cout << "potential moves for the piece: " << std::endl;
-	for (int idx = 0; idx < moves.size(); idx++)
-	{
-		std::cout << moves[idx].pretty_print() << std::endl;
-	}
 	if (std::find(moves.begin(), moves.end(), new_position) == moves.end())
 		return false;
 	return true;
@@ -58,17 +61,16 @@ void piece::add_diagonal_moves(std::vector<board::position>& moves, bool evaluat
 {
 	// add current position
 	board::position new_position(my_position);
-	new_position.value = gameboard->evaluate(my_color);
 	moves.push_back(new_position);
 
 	// move current position in each direction until we hit the edge of the board or another piece
+	// note that is_valid_position checks for collisions with my_color
 	while (true)
 	{
 		new_position.pos_x += 1;
 		new_position.pos_y += 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;
@@ -81,7 +83,6 @@ void piece::add_diagonal_moves(std::vector<board::position>& moves, bool evaluat
 		new_position.pos_y -= 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;
@@ -94,7 +95,6 @@ void piece::add_diagonal_moves(std::vector<board::position>& moves, bool evaluat
 		new_position.pos_y -= 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;
@@ -107,7 +107,6 @@ void piece::add_diagonal_moves(std::vector<board::position>& moves, bool evaluat
 		new_position.pos_y += 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;
@@ -120,18 +119,15 @@ void piece::add_straight_line_moves(std::vector<board::position>& moves, bool ev
 	board::position new_position(my_position);
 	// don't add the current position twice if we are processing moves for the queen
 	if (moves.size() == 0)
-	{
-		new_position.value = gameboard->evaluate(my_color);
 		moves.push_back(new_position);
-	}
 	
 	// move current position in each direction until we hit the edge of the board or another piece
+	// note that is_valid_position checks for collisions with my_color
 	while (true)
 	{
 		new_position.pos_x += 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;
@@ -143,7 +139,6 @@ void piece::add_straight_line_moves(std::vector<board::position>& moves, bool ev
 		new_position.pos_x -= 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;
@@ -155,7 +150,6 @@ void piece::add_straight_line_moves(std::vector<board::position>& moves, bool ev
 		new_position.pos_y += 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;
@@ -167,7 +161,6 @@ void piece::add_straight_line_moves(std::vector<board::position>& moves, bool ev
 		new_position.pos_y -= 1;
 		if (!is_valid_position(new_position))
 			break;
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 		if (gameboard->is_occupied_by_color(new_position, !my_color))
 			break;

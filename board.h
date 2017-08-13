@@ -8,7 +8,7 @@
 
 #define MOVE_STATE_NORMAL 0
 #define MOVE_STATE_TEST 1
-#define MOVE_STATE_REVERSE 2
+#define MOVE_STATE_RESTORE 2
 
 class piece;
 class pawn;
@@ -37,8 +37,9 @@ public:
 			pos_y(y),
 			value(0)
 		{};
-		// note: == and != use pos_x and pos_y to compare
-		// < and > use value and are defined for sorting a list of possible moves
+		// note: == and != use pos_x and pos_y to compare positions
+		// < and > use value to compare positions; they are intended for sorting
+		// to sort in descending order, they invert the expected operations
 		bool operator==(const position& other);
 		bool operator!=(const position& other);
 		bool operator<(const position& other);
@@ -65,6 +66,9 @@ public:
 	void move_piece(std::string str_start_pos, std::string str_end_pos);
 	void move_piece(board::position start_pos, board::position end_pos);
 	void move_piece(piece* piece_to_move, board::position end_pos, int move_state=MOVE_STATE_NORMAL);
+	
+	bool move_is_castle(piece* piece_to_move, board::position end_pos);
+	void move_piece_castle(piece* piece_to_move, board::position end_pos, int move_state);
 	
 	bool is_occupied_by_color(board::position pos, int color);
 	

@@ -40,7 +40,7 @@ public:
 	virtual char pretty_print() = 0;
 	
 	board::position get_position() { return my_position; }
-	void set_position(board::position new_position, bool castling=false);
+	void set_position(board::position new_position, bool should_validate_move=true);
 	int get_color() { return my_color; }
 	int get_opposing_color() { return !my_color; }
 	

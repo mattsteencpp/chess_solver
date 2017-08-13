@@ -11,17 +11,7 @@ std::vector<board::position> king::get_possible_moves(bool evaluating_check)
 		{
 			board::position new_position(my_position.pos_x + i, my_position.pos_y + j);
 			if (is_valid_position(new_position))
-			{
-				if (new_position != my_position)
-				{
-					new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
-				}
-				else
-				{
-					new_position.value = gameboard->evaluate(my_color);
-				}
 				moves.push_back(new_position);
-			}
 		}
 	}
 	// check on castling (to either side)
@@ -30,13 +20,11 @@ std::vector<board::position> king::get_possible_moves(bool evaluating_check)
 	if (!evaluating_check && can_castle_short())
 	{
 		board::position new_position(8, my_position.pos_y);
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 	}
 	if (!evaluating_check && can_castle_long())
 	{
 		board::position new_position(1, my_position.pos_y);
-		new_position.value = gameboard->evaluate_after_move(my_color, my_position, new_position);
 		moves.push_back(new_position);
 	}
 	
