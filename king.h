@@ -19,7 +19,9 @@ public:
 	~king();
 
 	char pretty_print() { if (my_color == PIECE_COLOR_WHITE) return 'K'; return 'k'; }
-	std::vector<board::position> get_possible_moves();
+	std::vector<board::position> get_possible_moves(bool evaluating_check=false);
+	bool can_castle_short();
+	bool can_castle_long();
 };
 
 #endif

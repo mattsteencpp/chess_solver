@@ -1,15 +1,23 @@
 
 #include "piece.h"
 #include <algorithm>
+#include <iostream>
 
 piece::~piece()
 {
 
 }
 
-void piece::set_position(board::position new_position)
+void piece::set_position(board::position new_position, bool castling)
 {
-	if (!is_valid_move(new_position))
+	if (castling)
+	{
+		if (!new_position.is_valid())
+		{
+			throw "the requested move from " + my_position.pretty_print() + " is a move off the board!";
+		}
+	}
+	else if (!is_valid_move(new_position))
 	{
 		throw "the requested move from " + my_position.pretty_print() + " to " + new_position.pretty_print() + " is not a valid move!";
 	}
@@ -17,9 +25,9 @@ void piece::set_position(board::position new_position)
 	my_position.value = 0;
 }
 
-board::position piece::get_best_move()
+board::position piece::get_best_move(bool evaluating_check)
 {
-	std::vector<board::position> moves = get_possible_moves();
+	std::vector<board::position> moves = get_possible_moves(evaluating_check);
 	std::sort(moves.begin(), moves.end());
 	return moves.front();
 }
@@ -30,20 +38,23 @@ bool piece::is_valid_position(board::position new_position)
 		return false;
 	if (gameboard->is_occupied_by_color(new_position, my_color))
 		return false;
-	if (gameboard->is_in_check_after_move(my_color, my_position, new_position))
-		return false;
 	return true;
 }
 
 bool piece::is_valid_move(board::position new_position)
 {
 	std::vector<board::position> moves = get_possible_moves();
+	std::cout << "potential moves for the piece: " << std::endl;
+	for (int idx = 0; idx < moves.size(); idx++)
+	{
+		std::cout << moves[idx].pretty_print() << std::endl;
+	}
 	if (std::find(moves.begin(), moves.end(), new_position) == moves.end())
 		return false;
 	return true;
 }
 
-void piece::add_diagonal_moves(std::vector<board::position>& moves)
+void piece::add_diagonal_moves(std::vector<board::position>& moves, bool evaluating_check)
 {
 	// add current position
 	board::position new_position(my_position);
@@ -104,7 +115,7 @@ void piece::add_diagonal_moves(std::vector<board::position>& moves)
 }
 
 
-void piece::add_straight_line_moves(std::vector<board::position>& moves)
+void piece::add_straight_line_moves(std::vector<board::position>& moves, bool evaluating_check)
 {
 	board::position new_position(my_position);
 	// don't add the current position twice if we are processing moves for the queen

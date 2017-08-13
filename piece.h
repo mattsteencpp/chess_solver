@@ -17,6 +17,14 @@
 #define PIECE_TYPE_KNIGHT 5
 #define PIECE_TYPE_PAWN 6
 
+// use most common piece valuations, with King very large to make sure protecting it is prioritized
+#define PIECE_VALUE_KING 200
+#define PIECE_VALUE_QUEEN 9
+#define PIECE_VALUE_ROOK 5
+#define PIECE_VALUE_BISHOP 3
+#define PIECE_VALUE_KNIGHT 3
+#define PIECE_VALUE_PAWN 1
+
 class piece
 {
 public:
@@ -28,26 +36,24 @@ public:
 		piece_type(PIECE_TYPE_NONE)
 	{};
 	~piece();
-
-	board::position get_best_move();
 	
 	virtual char pretty_print() = 0;
 	
 	board::position get_position() { return my_position; }
-	void set_position(board::position new_position);
+	void set_position(board::position new_position, bool castling=false);
 	int get_color() { return my_color; }
 	int get_opposing_color() { return !my_color; }
 	
 	int get_type() { return piece_type; }
 
-	// TODO: consider maintaining a (sorted) move list and updating for all pieces after each move priority 2
-	virtual std::vector<board::position> get_possible_moves() = 0;
+	board::position get_best_move(bool evaluating_check=false);
+	virtual std::vector<board::position> get_possible_moves(bool evaluating_check=false) = 0;
 protected:
 	bool is_valid_move(board::position new_position);
 	bool is_valid_position(board::position new_position);
 	
-	void add_diagonal_moves(std::vector<board::position>& moves);
-	void add_straight_line_moves(std::vector<board::position>& moves);
+	void add_diagonal_moves(std::vector<board::position>& moves, bool evaluating_check);
+	void add_straight_line_moves(std::vector<board::position>& moves, bool evaluating_check);
 	
 	int my_color;
 	int piece_type;
@@ -56,3 +62,4 @@ protected:
 };
 
 #endif
+

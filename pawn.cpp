@@ -9,16 +9,14 @@ bool pawn::is_valid_position(board::position new_position)
 	}
 	return new_position.is_valid() && 
 		!gameboard->is_occupied_by_color(new_position, my_color) && 
-		!gameboard->is_occupied_by_color(new_position, !my_color) && 
-		!gameboard->is_in_check_after_move(my_color, my_position, new_position);
+		!gameboard->is_occupied_by_color(new_position, !my_color);
 }
 
 bool pawn::is_valid_diagonal_position(board::position new_position)
 {
 	return new_position.is_valid() && 
 		!gameboard->is_occupied_by_color(new_position, my_color) && 
-		gameboard->is_occupied_by_color(new_position, !my_color) && 
-		!gameboard->is_in_check_after_move(my_color, my_position, new_position);
+		gameboard->is_occupied_by_color(new_position, !my_color);
 }
 
 bool pawn::can_be_promoted()
@@ -30,7 +28,7 @@ bool pawn::can_be_promoted()
 	return false;
 }
 
-std::vector<board::position> pawn::get_possible_moves()
+std::vector<board::position> pawn::get_possible_moves(bool evaluating_check)
 {
 	std::vector<board::position> moves;
 	// check increasing moves

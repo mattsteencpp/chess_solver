@@ -1,7 +1,7 @@
 
 #include "knight.h"
 
-std::vector<board::position> knight::get_possible_moves()
+std::vector<board::position> knight::get_possible_moves(bool evaluating_check)
 {
 	std::vector<board::position> moves;
 	

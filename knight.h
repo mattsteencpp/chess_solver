@@ -23,7 +23,7 @@ public:
 	// King also starts with K, so use N for night, as is tradition
 	char pretty_print() { if (my_color == PIECE_COLOR_WHITE) return 'N'; return 'n'; }
 
-	std::vector<board::position> get_possible_moves();
+	std::vector<board::position> get_possible_moves(bool evaluating_check=false);
 private:
 	// knight moves are irregular, so define arrays listing the 8 possible moves from any position
 	const int x_moves[8];
