@@ -30,18 +30,6 @@ board::board()
 
 board::~board()
 {
-	while (my_pieces[PIECE_COLOR_BLACK].size() > 0)
-	{
-		piece* next_piece = my_pieces[PIECE_COLOR_BLACK].back();
-		delete next_piece;
-		my_pieces[PIECE_COLOR_BLACK].pop_back();
-	}
-	while (my_pieces[PIECE_COLOR_WHITE].size() > 0)
-	{
-		piece* next_piece = my_pieces[PIECE_COLOR_WHITE].back();
-		delete next_piece;
-		my_pieces[PIECE_COLOR_WHITE].pop_back();
-	}
 }
 
 board::position::position(std::string str_pos)
@@ -231,7 +219,8 @@ void board::setup_new_game()
 	}
 }
 
-// each string in the vector should contain a 4 letter string (case insensitive)
+
+// each string should contain 4 letters (case insensitive)
 // the first letter must be either w or b for color
 // the second letter must be k, q, b, n, r, or p for piece
 // 		note that n is used for knights because k is already for king
@@ -240,97 +229,110 @@ void board::setup_new_game()
 //			the second character is a number from 1 to 8 representing the row.
 //		in this notation, the standard board setup has white in rows 1 and 2 and black in rows 7 and 8
 // if there is already a piece in the indicated position, an error will result
+void board::add_piece(std::string current_piece)
+{
+	if (current_piece.length() != 4)
+	{
+		throw "found an invalid instruction: '" + current_piece + "'. The string must specify the color (B or W), the piece (K, Q, B, N, R, or P) and the position (A-H for row followed by 1-8 for column) using uppercase or lowercase letters.";
+	}
+	int color;
+	switch(current_piece[0])
+	{
+		case 'W':
+		case 'w':
+		{
+			color = PIECE_COLOR_WHITE;
+			break;
+		}
+		case 'B':
+		case 'b':
+		{
+			color = PIECE_COLOR_BLACK;
+			break;
+		}
+		default:
+		{
+			throw "found an invalid instruction: '" + current_piece + "'. The string must start with B, W, b, or w to indicate the color of the piece to be placed.";
+			break;
+		}
+	}
+	board::position pos(current_piece.substr(2,2));
+	if (get_piece_at_position(pos) != 0)
+	{
+		throw "found an invalid instruction: '" + current_piece + "'. There is already a piece (" + get_piece_at_position(pos)->pretty_print() + ") at the specified position.";
+	}
+	
+	// create the piece and put it on the board
+	piece* next_piece;
+	switch(current_piece[1])
+	{
+		case 'K':
+		case 'k':
+		{
+			next_piece = (piece *)new king(color, pos, this);
+			king_pos[color] = pos;
+			break;
+		}
+		case 'Q':
+		case 'q':
+		{
+			next_piece = (piece *)new queen(color, pos, this);
+			break;
+		}
+		case 'B':
+		case 'b':
+		{
+			next_piece = (piece *)new bishop(color, pos, this);
+			break;
+		}
+		case 'N':
+		case 'n':
+		{
+			next_piece = (piece *)new knight(color, pos, this);
+			break;
+		}
+		case 'R':
+		case 'r':
+		{
+			next_piece = (piece *)new rook(color, pos, this);
+			break;
+		}
+		case 'P':
+		case 'p':
+		{
+			next_piece = (piece *)new pawn(color, pos, this);
+			break;
+		}
+		default:
+		{
+			throw "found an invalid instruction: '" + current_piece + "'. The piece type must be specified with K, Q, B, N, R, or P (using uppercase or lowercase letters).";
+			break;
+		}
+	}
+	
+	if (next_piece)
+	{
+		if (next_piece->get_type() == PIECE_TYPE_KING)
+		{
+			for (int idx = 0; idx < my_pieces[color].size(); idx++)
+			{
+				if (my_pieces[color][idx]->get_type() == PIECE_TYPE_KING)
+				{
+					throw "two kings of the same color cannot coexist on a chessboard.";
+				}
+			}
+		}
+		my_positions[pos.pos_x - 1][pos.pos_y - 1] = next_piece;
+		my_pieces[color].push_back(next_piece);
+	}
+	next_piece = 0;
+}
+
 void board::setup_game_in_progress(std::vector<std::string> pieces)
 {
 	for (int idx = 0; idx < pieces.size(); idx++)
 	{
-		// parse out the piece type and starting possition
-		std::string current_piece = pieces[idx];
-		if (current_piece.length() != 4)
-		{
-			throw "found an invalid instruction: '" + current_piece + "'. The string must specify the color (B or W), the piece (K, Q, B, N, R, or P) and the position (A-H for row followed by 1-8 for column) using uppercase or lowercase letters.";
-		}
-		int color;
-		switch(current_piece[0])
-		{
-			case 'W':
-			case 'w':
-			{
-				color = PIECE_COLOR_WHITE;
-				break;
-			}
-			case 'B':
-			case 'b':
-			{
-				color = PIECE_COLOR_BLACK;
-				break;
-			}
-			default:
-			{
-				throw "found an invalid instruction: '" + current_piece + "'. The string must start with B, W, b, or w to indicate the color of the piece to be placed.";
-				break;
-			}
-		}
-		board::position pos(current_piece.substr(2,2));
-		if (get_piece_at_position(pos) != 0)
-		{
-			throw "found an invalid instruction: '" + current_piece + "'. There is already a piece (" + get_piece_at_position(pos)->pretty_print() + ") at the specified position.";
-		}
-		
-		// create the piece and put it on the board
-		piece* next_piece;
-		switch(current_piece[1])
-		{
-			case 'K':
-			case 'k':
-			{
-				next_piece = (piece *)new king(color, pos, this);
-				king_pos[color] = pos;
-				break;
-			}
-			case 'Q':
-			case 'q':
-			{
-				next_piece = (piece *)new queen(color, pos, this);
-				break;
-			}
-			case 'B':
-			case 'b':
-			{
-				next_piece = (piece *)new bishop(color, pos, this);
-				break;
-			}
-			case 'N':
-			case 'n':
-			{
-				next_piece = (piece *)new knight(color, pos, this);
-				break;
-			}
-			case 'R':
-			case 'r':
-			{
-				next_piece = (piece *)new rook(color, pos, this);
-				break;
-			}
-			case 'P':
-			case 'p':
-			{
-				next_piece = (piece *)new pawn(color, pos, this);
-				break;
-			}
-			default:
-			{
-				throw "found an invalid instruction: '" + current_piece + "'. The piece type must be specified with K, Q, B, N, R, or P (using uppercase or lowercase letters).";
-				break;
-			}
-		}
-		
-		if (next_piece)
-		{
-			my_positions[pos.pos_x - 1][pos.pos_y - 1] = next_piece;
-			my_pieces[color].push_back(next_piece);
-		}
-		next_piece = 0;
+		add_piece(pieces[idx]);
 	}
 }
 

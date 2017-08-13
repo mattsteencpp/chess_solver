@@ -1,8 +1,7 @@
 
 
 CC=g++
-# TODO: add back -O3 when done...
-CFLAGS=-g -fmax-errors=5 -std=c++11
+CFLAGS=-O3 -fmax-errors=5 -std=c++11 -Wno-write-strings
 LFLAGS=
 
 EXEC=solver

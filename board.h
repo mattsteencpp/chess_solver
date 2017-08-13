@@ -59,6 +59,7 @@ public:
 	~board();
 	
 	void setup_new_game();
+	void add_piece(std::string current_piece);
 	void setup_game_in_progress(std::vector<std::string> pieces);
 	
 	piece* get_piece_at_position(board::position pos);
