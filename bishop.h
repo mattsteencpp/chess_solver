@@ -19,7 +19,7 @@ public:
 	~bishop();
 
 	char pretty_print() { if (my_color == PIECE_COLOR_WHITE) return 'B'; return 'b'; }
-	std::vector<board::position> get_possible_moves();
+	std::vector<board::position> get_possible_moves(bool evaluating_check=false);
 };
 
 #endif
