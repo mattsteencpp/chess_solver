@@ -32,17 +32,17 @@ board::board()
 
 board::~board()
 {
-	while (my_black_pieces.size() > 0)
+	while (my_pieces[PIECE_COLOR_BLACK].size() > 0)
 	{
-		piece* next_piece = my_black_pieces.back();
+		piece* next_piece = my_pieces[PIECE_COLOR_BLACK].back();
 		delete next_piece;
-		my_black_pieces.pop_back();
+		my_pieces[PIECE_COLOR_BLACK].pop_back();
 	}
-	while (my_white_pieces.size() > 0)
+	while (my_pieces[PIECE_COLOR_WHITE].size() > 0)
 	{
-		piece* next_piece = my_white_pieces.back();
+		piece* next_piece = my_pieces[PIECE_COLOR_WHITE].back();
 		delete next_piece;
-		my_white_pieces.pop_back();
+		my_pieces[PIECE_COLOR_WHITE].pop_back();
 	}
 }
 
@@ -164,120 +164,73 @@ bool board::is_occupied_by_color(board::position pos, int color)
 void board::setup_new_game()
 {
 	board::position base_position(1, 2);
-	// setup white pawns
-	for (int idx = 1; idx < 9; idx++)
+	for (int color = PIECE_COLOR_WHITE; color <= PIECE_COLOR_BLACK; color++)
 	{
-		base_position.pos_x = idx;
-		pawn* next_piece = new pawn(PIECE_COLOR_WHITE, base_position, this);
-		my_white_pieces.push_back(next_piece);
+		if (color == PIECE_COLOR_BLACK)
+		{
+			base_position.pos_y = 7;
+		}
+		// setup pawns
+		for (int idx = 1; idx < 9; idx++)
+		{
+			base_position.pos_x = idx;
+			pawn* next_piece = new pawn(color, base_position, this);
+			my_pieces[color].push_back(next_piece);
+			my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+		}
+	
+		// setup other pieces from left to right
+		base_position.pos_x = 0;
+		base_position.pos_y = 1;
+		if (color == PIECE_COLOR_BLACK)
+		{
+			base_position.pos_y = 8;
+		}
+	
+		piece* next_piece;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new rook(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
+		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new knight(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
+		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new bishop(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
+		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new queen(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
+		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new king(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
+		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+		king_pos[color] = base_position;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new bishop(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
+		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new knight(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
+		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
+	
+		base_position.pos_x++;
+		next_piece = (piece *)new rook(color, base_position, this);
+		my_pieces[color].push_back(next_piece);
 		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
 	}
-	
-	// setup other white pieces from left to right
-	base_position.pos_x = 0;
-	base_position.pos_y = 1;
-	
-	piece* next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new rook(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new knight(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new bishop(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new queen(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new king(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	king_pos[PIECE_COLOR_WHITE] = base_position;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new bishop(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new knight(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new rook(PIECE_COLOR_WHITE, base_position, this);
-	my_white_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	
-	// setup black pawns
-	base_position.pos_x = 1;
-	base_position.pos_y = 7;
-	for (int idx = 1; idx < 9; idx++)
-	{
-		base_position.pos_x = idx;
-		pawn* next_piece = new pawn(PIECE_COLOR_BLACK, base_position, this);
-		my_black_pieces.push_back(next_piece);
-		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	}
-	
-	// setup other black pieces from left to right
-	base_position.pos_x = 0;
-	base_position.pos_y = 8;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new rook(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new knight(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new bishop(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new queen(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new king(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	king_pos[PIECE_COLOR_BLACK] = base_position;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new bishop(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new knight(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
-	
-	base_position.pos_x++;
-	next_piece = (piece *)new rook(PIECE_COLOR_BLACK, base_position, this);
-	my_black_pieces.push_back(next_piece);
-	my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
 }
 
 // each string in the vector should contain a 4 letter string (case insensitive)
@@ -377,10 +330,7 @@ void board::setup_game_in_progress(std::vector<std::string> pieces)
 		if (next_piece)
 		{
 			my_positions[pos.pos_x - 1][pos.pos_y - 1] = next_piece;
-			if (color == PIECE_COLOR_WHITE)
-				my_white_pieces.push_back(next_piece);
-			else
-				my_black_pieces.push_back(next_piece);
+			my_pieces[color].push_back(next_piece);
 		}
 		next_piece = 0;
 	}
@@ -451,14 +401,7 @@ int board::evaluate_after_move(int color, board::position start_pos, board::posi
 
 void board::restore_piece(piece* piece_to_restore)
 {
-	if (piece_to_restore->get_color() == PIECE_COLOR_WHITE)
-	{
-		my_white_pieces.push_back(piece_to_restore);
-	}
-	else
-	{
-		my_black_pieces.push_back(piece_to_restore);
-	}
+	my_pieces[piece_to_restore->get_color()].push_back(piece_to_restore);
 	my_positions[piece_to_restore->get_position().pos_x - 1][piece_to_restore->get_position().pos_y - 1] = piece_to_restore;
 }
 
@@ -476,6 +419,7 @@ void board::move_piece(board::position start_pos, board::position end_pos)
 }
 
 // TODO: make sure we can undo castling... priority 1
+// TODO: refactor priority ?
 void board::move_piece(piece* piece_to_move, board::position end_pos, int move_state)
 {
 	if (move_state == MOVE_STATE_NORMAL)
@@ -617,24 +561,12 @@ void board::remove_piece(piece* piece_to_remove, int move_state)
 		throw "Invalid action: asked to remove a piece that doesn't exist";
 	}
 	int color = piece_to_remove->get_color();
-	if (color == PIECE_COLOR_WHITE)
+	std::vector<piece*>::iterator it = std::find(my_pieces[color].begin(), my_pieces[color].end(), piece_to_remove);
+	if (it == my_pieces[color].end())
 	{
-		std::vector<piece*>::iterator it = std::find(my_white_pieces.begin(), my_white_pieces.end(), piece_to_remove);
-		if (it == my_white_pieces.end())
-		{
-			throw std::string("Invalid action: the piece to be removed (") + piece_to_remove->pretty_print() + ", " + piece_to_remove->get_position().pretty_print() + ") is white but could not be found in the list of white pieces on the board.";
-		}
-		my_white_pieces.erase(it);
+		throw std::string("Invalid action: the piece to be removed (") + piece_to_remove->pretty_print() + ", " + piece_to_remove->get_position().pretty_print() + ") is white but could not be found in the list of white pieces on the board.";
 	}
-	else
-	{
-		std::vector<piece*>::iterator it = std::find(my_black_pieces.begin(), my_black_pieces.end(), piece_to_remove);
-		if (it == my_black_pieces.end())
-		{
-			throw std::string("Invalid action: the piece to be removed (") + piece_to_remove->pretty_print() + ", " + piece_to_remove->get_position().pretty_print() + ") is black but could not be found in the list of black pieces on the board.";
-		}
-		my_black_pieces.erase(it);
-	}
+	my_pieces[color].erase(it);
 	my_positions[piece_to_remove->get_position().pos_x - 1][piece_to_remove->get_position().pos_y - 1] = 0;
 	if (move_state != MOVE_STATE_TEST)
 		delete piece_to_remove;
@@ -656,14 +588,7 @@ void board::promote_pawn(pawn* pawn_to_promote, int move_state)
 	int color = pawn_to_promote->get_color();
 	remove_piece(pawn_to_promote, move_state);
 	queen* new_queen = new queen(color, old_position, this);
-	if (color == PIECE_COLOR_WHITE)
-	{
-		my_white_pieces.push_back(new_queen);
-	}
-	else
-	{
-		my_black_pieces.push_back(new_queen);
-	}
+	my_pieces[color].push_back(new_queen);
 	my_positions[old_position.pos_x - 1][old_position.pos_y - 1] = new_queen;
 }
 
@@ -677,68 +602,36 @@ bool board::is_in_check(int color, board::position king_pos)
 	// find the king of this color and store the position
 	// iterate over pieces of the other color given the current setup
 	// if any of them has, as a possible move, capturing the king, then return true
-	if (color == PIECE_COLOR_WHITE)
+	for (int idx = 0; idx < my_pieces[!color].size(); idx++)
 	{
-		for (int idx = 0; idx < my_black_pieces.size(); idx++)
+		std::vector<board::position> moves = my_pieces[!color][idx]->get_possible_moves(true);
+		if (std::find(moves.begin(), moves.end(), king_pos) != moves.end())
 		{
-			std::vector<board::position> moves = my_black_pieces[idx]->get_possible_moves(true);
-			if (std::find(moves.begin(), moves.end(), king_pos) != moves.end())
-			{
-				return true;
-			}
-		}
-	}
-	else
-	{
-		for (int idx = 0; idx < my_white_pieces.size(); idx++)
-		{
-			std::vector<board::position> moves = my_white_pieces[idx]->get_possible_moves(true);
-			if (std::find(moves.begin(), moves.end(), king_pos) != moves.end())
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
 }
 
+// assumes that color is in check when called
 bool board::is_in_checkmate(int color)
 {
 	// iterate over pieces of the current color and compare their best moves
 	// if, after the very best move, that color is still in check, then that color has been checkmated
-	if (color == PIECE_COLOR_WHITE)
+	piece* best_piece_to_move = 0;
+	int best_score = -1000;
+	for (int idx = 0; idx < my_pieces[color].size(); idx++)
 	{
-		piece* best_piece_to_move = 0;
-		int best_score = -1000;
-		for (int idx = 0; idx < my_white_pieces.size(); idx++)
+		board::position best_move = my_pieces[color][idx]->get_best_move(true);
+		if (best_move.value > best_score)
 		{
-			board::position best_move = my_white_pieces[idx]->get_best_move(true);
-			if (best_move.value > best_score)
-			{
-				best_score = best_move.value;
-				best_piece_to_move = my_white_pieces[idx];
-			}
+			best_score = best_move.value;
+			best_piece_to_move = my_pieces[color][idx];
 		}
-		// note: if the best opponent's move is to stay put, then they can't get out of check
-		if (best_piece_to_move->get_position() == best_piece_to_move->get_best_move(true))
-			return true;
 	}
-	else
-	{
-		piece* best_piece_to_move = 0;
-		int best_score = -1000;
-		for (int idx = 0; idx < my_white_pieces.size(); idx++)
-		{
-			board::position best_move = my_white_pieces[idx]->get_best_move(true);
-			if (best_move.value > best_score)
-			{
-				best_score = best_move.value;
-				best_piece_to_move = my_white_pieces[idx];
-			}
-		}
-		if (best_piece_to_move->get_position() == best_piece_to_move->get_best_move(true))
-			return true;
-	}
+	// note: if the best opponent's move is to stay put, then they can't get out of check
+	if (best_piece_to_move->get_position() == best_piece_to_move->get_best_move(true))
+		return true;
 	return false;
 }
 

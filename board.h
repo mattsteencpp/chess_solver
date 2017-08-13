@@ -83,8 +83,8 @@ private:
 	void remove_piece(piece* piece_to_remove, int move_state=MOVE_STATE_NORMAL);
 	void restore_piece(piece* piece_to_restore);
 	void promote_pawn(pawn* pawn_to_promote, int move_state=MOVE_STATE_NORMAL);
-	std::vector<piece*> my_black_pieces;
-	std::vector<piece*> my_white_pieces;
+	
+	std::vector<piece*> my_pieces[2];
 	
 	board::position king_pos[2];
 	
