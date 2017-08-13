@@ -1,4 +1,3 @@
-
 #ifndef BISHOP_H
 #define BISHOP_H
 
@@ -11,8 +10,7 @@ class bishop: public piece
 {
 public:
 	bishop(int color, board::position pos, board* new_board)
-	:
-		piece(color, pos, new_board)
+	:	piece(color, pos, new_board)
 	{
 		piece_type = PIECE_TYPE_BISHOP;
 		piece_value = PIECE_VALUE_BISHOP;

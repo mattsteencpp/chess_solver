@@ -1,4 +1,3 @@
-
 #ifndef KING_H
 #define KING_H
 
@@ -11,8 +10,7 @@ class king: public piece
 {
 public:
 	king(int color, board::position pos, board* new_board)
-	:
-		piece(color, pos, new_board)
+	:	piece(color, pos, new_board)
 	{
 		piece_type = PIECE_TYPE_KING;
 		piece_value = PIECE_VALUE_KING;

@@ -1,4 +1,3 @@
-
 #include "king.h"
 
 std::vector<board::position> king::get_possible_moves(bool evaluating_check)
@@ -15,8 +14,6 @@ std::vector<board::position> king::get_possible_moves(bool evaluating_check)
 		}
 	}
 	// check on castling (to either side)
-	// when performing this move, will be listed as starting with the king; move_piece will have to be updated to handle that (and almost certainly to verify that castling is allowed in that scenario...)
-	
 	if (!evaluating_check && can_castle_short())
 	{
 		board::position new_position(8, my_position.pos_y);

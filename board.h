@@ -1,5 +1,3 @@
-
-
 #ifndef BOARD_H
 #define BOARD_H
 
@@ -24,15 +22,13 @@ public:
 	{
 	public:
 		position()
-		:
-			pos_x(1),
+		:	pos_x(1),
 			pos_y(1),
 			value(0)
 		{}
 		position(std::string str_pos);
 		position(const position& source)
-		:
-			pos_x(source.pos_x),
+		:	pos_x(source.pos_x),
 			pos_y(source.pos_y),
 			value(source.value)
 		{}
@@ -43,7 +39,7 @@ public:
 		{};
 		// note: == and != use pos_x and pos_y to compare positions
 		// < and > use value to compare positions; they are intended for sorting
-		// to sort in descending order, they invert the expected operations
+		// to sort in descending order, so they invert the expected operations
 		bool operator==(const position& other);
 		bool operator!=(const position& other);
 		bool operator<(const position& other);
@@ -100,7 +96,7 @@ private:
 	
 	board::position king_pos[2];
 	
-	// if the king or the designated rook has been moved, then the king cannot castle
+	// if the king or the designated rook has been moved, then the king cannot castle, so track their movement
 	bool king_moved[2];
 	bool king_rook_moved[2];
 	bool queen_rook_moved[2];

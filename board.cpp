@@ -81,7 +81,8 @@ bool board::position::operator!=(const position& other)
 	return false;
 }
 
-
+// note: these operators are inverted so std::sort
+// results in ascending values
 bool board::position::operator<(const position& other)
 {
 	return value > other.value;
@@ -218,7 +219,6 @@ void board::setup_new_game()
 		my_positions[base_position.pos_x - 1][base_position.pos_y - 1] = next_piece;
 	}
 }
-
 
 // each string should contain 4 letters (case insensitive)
 // the first letter must be either w or b for color
@@ -361,7 +361,9 @@ void board::suggest_move(int color)
 {
 	piece* best_piece_to_move = 0;
 	board::position best_move;
+	
 	get_best_move_for_color(color, best_piece_to_move, best_move);
+	
 	if (best_piece_to_move == 0)
 		throw "Something went wrong. You have not been checkmated, but we couldn't find a piece to suggest moving.";
 	if (best_piece_to_move->get_position() == best_move)
@@ -387,6 +389,7 @@ int board::evaluate(int color)
 		return MOVING_INTO_CHECK_VALUE;
 	}
 	
+	// we can't evaluate every possible sequence of moves to the endgame, so set an arbitrary limit
 	if (depth >= MAX_DEPTH)
 	{
 		depth--;
@@ -477,7 +480,7 @@ int board::evaluate_after_move(int color, board::position start_pos, board::posi
 			(piece_to_move->get_type() == PIECE_TYPE_KING && is_in_danger(piece_to_move->get_color(), end_pos)))
 		{
 			// we detect checkmate if the optimal move is staying put when in check, so make sure
-			// that's the optimal behavior in that situation
+			// an unhelpful move doesn't have the same value
 			value = MOVING_INTO_CHECK_VALUE - 1;
 		}
 		else
@@ -622,9 +625,10 @@ void board::move_piece_castle(piece* piece_to_move, board::position end_pos, int
 	my_positions[new_rook_pos.pos_x - 1][new_rook_pos.pos_y - 1] = rook_to_castle_with;
 	
 	// update the position of each piece and the global king_pos
-	piece_to_move->set_position(end_pos, false);
+	bool should_validate_move = false;
+	piece_to_move->set_position(end_pos, should_validate_move);
 	king_pos[piece_to_move->get_color()] = end_pos;
-	rook_to_castle_with->set_position(new_rook_pos, false);
+	rook_to_castle_with->set_position(new_rook_pos, should_validate_move);
 	
 	// in the right circumstances, moving the rook could put the opponent into check
 	if (move_state == MOVE_STATE_NORMAL && is_in_check(piece_to_move->get_opposing_color()))
@@ -766,9 +770,8 @@ bool board::is_in_check(int color)
 
 bool board::is_in_danger(int color, board::position piece_pos)
 {
-	// find the king of this color and store the position
-	// iterate over pieces of the other color given the current setup
-	// if any of them has, as a possible move, capturing the king, then return true
+	// iterate over pieces of the other color
+	// if any of them has, as a possible move, capturing the position indicated, then return true
 	for (int idx = 0; idx < my_pieces[!color].size(); idx++)
 	{
 		if (!my_pieces[!color][idx]->is_on_board())
@@ -787,7 +790,7 @@ bool board::is_in_danger(int color, board::position piece_pos)
 
 // iterate over pieces of the current color and compare their best moves
 // if, after the very best move, that color is still in check, then that color has been checkmated
-// note: this method assumes that color is already in check when called
+// note: this method assumes that the current color is already in check when called
 bool board::is_in_checkmate(int color)
 {
 	piece* best_piece_to_move = 0;
@@ -798,6 +801,3 @@ bool board::is_in_checkmate(int color)
 		return true;
 	return false;
 }
-
-
-

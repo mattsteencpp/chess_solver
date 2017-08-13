@@ -1,4 +1,3 @@
-
 #include "pawn.h"
 
 bool pawn::is_valid_position(board::position new_position)
@@ -31,11 +30,9 @@ bool pawn::can_be_promoted()
 std::vector<board::position> pawn::get_possible_moves(bool evaluating_check)
 {
 	std::vector<board::position> moves;
-	// check increasing moves
 	int y_change = 1;
 	if (my_color == PIECE_COLOR_BLACK)
 	{
-		// check decreasing moves
 		y_change = -1;
 	}
 	board::position new_position(my_position);

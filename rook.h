@@ -1,4 +1,3 @@
-
 #ifndef ROOK_H
 #define ROOK_H
 
@@ -11,8 +10,7 @@ class rook: public piece
 {
 public:
 	rook(int color, board::position pos, board* new_board)
-	:
-		piece(color, pos, new_board)
+	:	piece(color, pos, new_board)
 	{
 		piece_type = PIECE_TYPE_ROOK;
 		piece_value = PIECE_VALUE_ROOK;

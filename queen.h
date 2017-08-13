@@ -1,4 +1,3 @@
-
 #ifndef QUEEN_H
 #define QUEEN_H
 
@@ -11,8 +10,7 @@ class queen: public piece
 {
 public:
 	queen(int color, board::position pos, board* new_board)
-	:
-		piece(color, pos, new_board)
+	:	piece(color, pos, new_board)
 	{
 		piece_type = PIECE_TYPE_QUEEN;
 		piece_value = PIECE_VALUE_QUEEN;

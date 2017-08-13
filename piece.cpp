@@ -1,4 +1,3 @@
-
 #include "piece.h"
 #include <algorithm>
 #include <iostream>
@@ -141,7 +140,6 @@ void piece::add_diagonal_moves(std::vector<board::position>& moves, bool evaluat
 			break;
 	}
 }
-
 
 void piece::add_straight_line_moves(std::vector<board::position>& moves, bool evaluating_check)
 {
