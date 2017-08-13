@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 				if (piece_to_move && piece_to_move->get_color() != color)
 				{
 					std::cout << "The piece you requested to move is " << chessboard.get_color_name(color);
-					std::cout << ", but it is " << chessboard.get_color_name(!color) << "'s turn . Please try again." << std::endl;
+					std::cout << ", but it is " << chessboard.get_color_name(!color) << "'s turn. Please try again." << std::endl;
 					continue;
 				}
 				
@@ -119,6 +119,43 @@ int main(int argc, char* argv[])
 			{
 				chessboard.suggest_move(color);
 			}
+			else if (command == "l" || command == "L")
+			{
+				std::cin >> start_pos_str;
+				board::position start_pos(start_pos_str);
+				if (!start_pos.is_valid())
+				{
+					std::cout << "The starting position you entered is not valid. Please try again." << std::endl;
+					continue;
+				}
+				
+				piece* piece_to_suggest = chessboard.get_piece_at_position(start_pos);
+				if (!piece_to_suggest)
+				{
+					std::cout << "We could not find a piece at the requested position. Please try again." << std::endl;
+					continue;
+				}
+				
+				if (piece_to_suggest->get_color() != color)
+				{
+					std::cout << "The piece you requested suggestions for is " << chessboard.get_color_name(color);
+					std::cout << ", but it is " << chessboard.get_color_name(!color) << "'s turn. Please try again." << std::endl;
+					continue;
+				}
+
+				std::cout << "The possible moves for piece " << piece_to_suggest->pretty_print() << " are: " << std::endl;
+				board::position best_move = piece_to_suggest->get_best_move(false);
+				
+				std::vector<board::position> moves = piece_to_suggest->get_possible_moves(false);
+				for (int idx = 0; idx < moves.size(); idx++)
+				{
+					std::cout << moves[idx].pretty_print();
+					if (moves[idx] == best_move)
+						std::cout << " (recommended)";
+					std::cout << std::endl;
+				}
+				
+			}
 			else if (command == "h" || command == "H")
 			{
 				show_help(in_setup, chessboard);
@@ -145,8 +182,6 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "An exception occurred while trying to play out the game: " << message << std::endl;
 	}
-	
-	std::cout << "" << std::endl;
 }
 
 
@@ -168,6 +203,7 @@ void show_help(bool in_setup, board chessboard)
 		std::cout << "To move a piece, press m followed by two valid locations." << std::endl;
 		std::cout << "    Note: to castle a king (when permitted), request to move the king on top of the rook." << std::endl;
 		std::cout << "To ask for a suggestion, press s." << std::endl;
+		std::cout << "To list possible moves and get a suggestion for a particular piece, press l followed by the location of the piece." << std::endl;
 		std::cout << "To quit the game, press q." << std::endl;
 	
 	}
