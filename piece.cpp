@@ -2,6 +2,7 @@
 #include "piece.h"
 #include <algorithm>
 #include <iostream>
+#include <random>
 
 piece::~piece()
 {
@@ -37,7 +38,35 @@ board::position piece::get_best_move(bool evaluating_check)
 			moves[idx].value = gameboard->evaluate(my_color);
 	}
 	std::sort(moves.begin(), moves.end());
-	return moves.front();
+	// if we have a tie, randomly choose among the options
+	int score = moves.front().value;
+	int stay_put_idx = -1;
+	int tied_moves = 0;
+	int best_move_idx = 0;
+	for (int idx = 0; idx < moves.size(); idx++)
+	{
+		if (moves[idx].value == score)
+		{
+			tied_moves++;
+			if (score > MOVING_INTO_CHECK_VALUE && stay_put_idx == -1 && moves[idx] == my_position)
+				stay_put_idx = idx;
+		}
+		else
+			break;
+	}
+	if (tied_moves > 1)
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> distribution(0, tied_moves - 1);
+		best_move_idx = distribution(gen);
+		// try to avoid staying put if at all possible
+		while (best_move_idx == stay_put_idx)
+		{
+			best_move_idx = distribution(gen);
+		}
+	}
+	return moves[best_move_idx];
 }
 
 bool piece::is_valid_position(board::position new_position)

@@ -15,6 +15,7 @@ public:
 		piece(color, pos, new_board)
 	{
 		piece_type = PIECE_TYPE_PAWN;
+		piece_value = PIECE_VALUE_PAWN;
 	};
 	~pawn();
 	

@@ -17,6 +17,7 @@ public:
 		y_moves{2, -2, 2, -2, 1, -1, 1, -1}
 	{
 		piece_type = PIECE_TYPE_KNIGHT;
+		piece_value = PIECE_VALUE_KNIGHT;
 	};
 	~knight();
 

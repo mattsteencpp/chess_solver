@@ -24,6 +24,7 @@
 #define PIECE_VALUE_BISHOP 3
 #define PIECE_VALUE_KNIGHT 3
 #define PIECE_VALUE_PAWN 1
+#define PIECE_VALUE_NONE 0
 
 class piece
 {
@@ -33,7 +34,9 @@ public:
 		my_color(color),
 		my_position(pos),
 		gameboard(new_board),
-		piece_type(PIECE_TYPE_NONE)
+		piece_type(PIECE_TYPE_NONE),
+		piece_value(PIECE_VALUE_NONE),
+		on_board(true)
 	{};
 	~piece();
 	
@@ -45,6 +48,12 @@ public:
 	int get_opposing_color() { return !my_color; }
 	
 	int get_type() { return piece_type; }
+	int get_value() { return piece_value; }
+	
+	bool is_on_board() { return on_board; }
+	
+	bool temporarily_remove_from_board() { on_board = false; }
+	bool return_to_board() { on_board = true; }
 
 	board::position get_best_move(bool evaluating_check=false);
 	virtual std::vector<board::position> get_possible_moves(bool evaluating_check=false) = 0;
@@ -55,8 +64,10 @@ protected:
 	void add_diagonal_moves(std::vector<board::position>& moves, bool evaluating_check);
 	void add_straight_line_moves(std::vector<board::position>& moves, bool evaluating_check);
 	
+	bool on_board;
 	int my_color;
 	int piece_type;
+	int piece_value;
 	board::position my_position;
 	board* gameboard;
 };

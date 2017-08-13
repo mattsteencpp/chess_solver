@@ -10,7 +10,7 @@ std::vector<board::position> king::get_possible_moves(bool evaluating_check)
 		for (int j = -1; j < 2; j++)
 		{
 			board::position new_position(my_position.pos_x + i, my_position.pos_y + j);
-			if (is_valid_position(new_position))
+			if (new_position == my_position || is_valid_position(new_position))
 				moves.push_back(new_position);
 		}
 	}
@@ -45,9 +45,6 @@ std::vector<board::position> king::get_possible_moves(bool evaluating_check)
 // the king is in check
 // the king would move into check
 // the king would pass through a square that is in check
-
-// note that we don't look at moving into check here because that 
-// scenario will be covered by evaluate_after_move if we get that far
 bool king::can_castle_short()
 {
 	if (gameboard->has_king_moved(my_color))
@@ -65,12 +62,15 @@ bool king::can_castle_short()
 	// the king is currently in check
 	if (gameboard->is_in_check(my_color))
 		return false;
+	// the king would move into check
+	if (gameboard->is_in_danger(my_color, king_pos))
+		return false;
 	// move back to the middle square to see if the king would
 	// move through check. we do this afterward because it's
 	// a more time-consuming process
 	king_pos.pos_x--;
 	// the king would pass through a square that is in check
-	if (gameboard->is_in_check(my_color, king_pos))
+	if (gameboard->is_in_danger(my_color, king_pos))
 		return false;
 	return true;
 }
@@ -95,12 +95,15 @@ bool king::can_castle_long()
 	// the king is currently in check
 	if (gameboard->is_in_check(my_color))
 		return false;
+	// the king would move into check
+	if (gameboard->is_in_danger(my_color, king_pos))
+		return false;
 	// move back to the middle square to see if the king would
 	// move through check. we do this afterward because it's
 	// a more time-consuming process
 	king_pos.pos_x += 2;
 	// the king would pass through a square that is in check
-	if (gameboard->is_in_check(my_color, king_pos))
+	if (gameboard->is_in_danger(my_color, king_pos))
 		return false;
 	return true;
 }

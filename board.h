@@ -10,6 +10,10 @@
 #define MOVE_STATE_TEST 1
 #define MOVE_STATE_RESTORE 2
 
+#define MOVING_INTO_CHECK_VALUE -100
+#define OPPONENT_IN_CHECK_VALUE 5
+#define OPPONENT_IN_CHECKMATE_VALUE 100
+
 class piece;
 class pawn;
 
@@ -59,9 +63,12 @@ public:
 	
 	piece* get_piece_at_position(board::position pos);
 	
-	int evaluate(int color);
+	void suggest_move(int color);
 	
+	int evaluate(int color);
 	int evaluate_after_move(int color, board::position start_pos, board::position end_pos);
+	
+	void get_best_move_for_color(int color, piece*& best_piece_to_move, board::position& best_move);
 	
 	void move_piece(std::string str_start_pos, std::string str_end_pos);
 	void move_piece(board::position start_pos, board::position end_pos);
@@ -73,7 +80,7 @@ public:
 	bool is_occupied_by_color(board::position pos, int color);
 	
 	bool is_in_check(int color);
-	bool is_in_check(int color, board::position king_pos);
+	bool is_in_danger(int color, board::position piece_pos);
 	bool is_in_checkmate(int color);
 	
 	char* get_color_name(int color);

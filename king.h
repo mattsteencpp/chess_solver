@@ -15,6 +15,7 @@ public:
 		piece(color, pos, new_board)
 	{
 		piece_type = PIECE_TYPE_KING;
+		piece_value = PIECE_VALUE_KING;
 	};
 	~king();
 
